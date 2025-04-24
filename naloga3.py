@@ -13,4 +13,4 @@ def izracunaj_centre(slika, izbira, dimenzija_centra, T):
     pass
 
 if __name__ == "__main__":
-    pass
+    print("Naloga 3: Segmentacija slik")
