@@ -21,11 +21,17 @@ def evklidska_razdalja(piksel, center, dimenzija):
         db = piksel[4] - center[4]
         return math.sqrt(dx*dx + dy*dy + dr*dr + dg*dg + db*db)
 
-def kmeans(slika, k=3, iteracije=10):
+def kmeans(slika, k=3, iteracije=10, dimenzija=3):
     '''Izvede segmentacijo slike z uporabo metode k-means.'''
     visina, sirina, kanali = slika.shape
 
-    
+    if dimenzija == 3:
+        slika_sivinska = cv.cvtColor(slika, cv.COLOR_BGR2GRAY)
+        centri = izracunaj_centre(slika_sivinska, "nakljucno", dimenzija, 2, k)
+        segmentirana_slika = np.zeros((visina, sirina), dtype=np.uint8)
+    elif dimenzija == 5:
+        centri = izracunaj_centre(slika, "nakljucno", dimenzija, 2, k)
+        segmentirana_slika = np.zeros((visina, sirina, 3), dtype=np.uint8)
 
 def meanshift(slika, velikost_okna, dimenzija):
     '''Izvede segmentacijo slike z uporabo metode mean-shift.'''
