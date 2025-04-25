@@ -220,3 +220,7 @@ if __name__ == "__main__":
     print("Naloga 3: Segmentacija slik")
 
     slika = cv.imread(".utils/small.jpg")
+    seg_slika = kmeans(slika, k=3, iteracije=10, dimenzija=3)
+    cv.imshow("seg slika", seg_slika)
+    cv.waitKey(0)
+    cv.destroyAllWindows()
