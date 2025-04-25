@@ -21,7 +21,7 @@ def evklidska_razdalja(piksel, center, dimenzija):
         db = piksel[4] - center[4]
         return math.sqrt(dx*dx + dy*dy + dr*dr + dg*dg + db*db)
 
-def kmeans(slika, k=3, iteracije=10, dimenzija=3):
+def kmeans(slika, k=3, iteracije=10):
     '''Izvede segmentacijo slike z uporabo metode k-means.'''
     visina, sirina, kanali = slika.shape
 
@@ -148,7 +148,6 @@ def kmeans(slika, k=3, iteracije=10, dimenzija=3):
                 segmentirana_slika[y, x] = centri[oznake[y, x]][2:5]
 
     return segmentirana_slika
-
 
 
 def meanshift(slika, velikost_okna, dimenzija):
