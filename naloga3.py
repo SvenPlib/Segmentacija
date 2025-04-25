@@ -31,8 +31,15 @@ def meanshift(slika, velikost_okna, dimenzija):
 
 def izracunaj_centre(slika, izbira, dimenzija_centra, T):
     '''Izračuna centre za metodo kmeans.'''
+    visina, sirina = slika.shape[:2]
+    centri = []
+
     # Izberemo naključne centre
     if izbira == "nakljucno":
+        x = np.random.randint(0, sirina)
+        y = np.random.randint(0, visina)
+            
+        barva = slika[y, x]
         if dimenzija_centra == 5:
             print("Izbrali smo naključne centre v 5D prostoru.")
         elif dimenzija_centra == 3:
