@@ -53,9 +53,29 @@ def kmeans(slika, k=3, iteracije=10, dimenzija=3):
                     min_index = razdalje.index(min_razdalja)
 
                     oznake[y,x] = min_index
+            
+            # 2. Izračunamo nove centre
+            novi_centri = []
+
+            for i in range(k):
+                # Izberemo vse piksele, ki so dodeljeni centru i
+                pikseli = []
+
+                for y in range(visina):
+                    for x in range(sirina):
+                        if oznake[y,x] == i:
+                            pikseli.append([x,y, slika_sivinska[y,x]])
+
+                # Izračunamo povprečje
+                if len(pikseli) > 0:
+                    povprecje = np.mean(pikseli, axis=0)
+                    novi_centri.append(povprecje)
+                else:
+                    novi_centri.append(centri[i])
 
 
         elif dimenzija == 5:
+            # 1. Označimo vsak piksel s številko centra
             for y in range(visina):
                 for x in range(sirina):
                     piksel = np.array([x, y, slika[y, x][0], slika[y, x][1], slika[y, x][2]], dtype=np.float64)
@@ -71,6 +91,25 @@ def kmeans(slika, k=3, iteracije=10, dimenzija=3):
 
                     # Dodelimo barvo centra
                     oznake[y, x] = min_index
+            
+            # 2. Izračunamo nove centre
+            novi_centri = []
+
+            for i in range(k):
+                # Izberemo vse piksele, ki so dodeljeni centru i
+                pikseli = []
+
+                for y in range(visina):
+                    for x in range(sirina):
+                        if oznake[y,x] == i:
+                            pikseli.append([x,y, slika[y,x][0], slika[y,x][1], slika[y,x][2]])
+
+                # Izračunamo povprečje
+                if len(pikseli) > 0:
+                    povprecje = np.mean(pikseli, axis=0)
+                    novi_centri.append(povprecje)
+                else:
+                    novi_centri.append(centri[i])
 
 
 def meanshift(slika, velikost_okna, dimenzija):
