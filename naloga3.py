@@ -21,57 +21,9 @@ def evklidska_razdalja(piksel, center, dimenzija):
         db = piksel[4] - center[4]
         return math.sqrt(dx*dx + dy*dy + dr*dr + dg*dg + db*db)
 
-def kmeans(slika, k=3, iteracije=10, dimenzija=3):
+def kmeans(slika, k=3, iteracije=10):
     '''Izvede segmentacijo slike z uporabo metode k-means.'''
-    visina, sirina, kanali = slika.shape
-
-    if dimenzija == 3:
-        slika_sivinska = cv.cvtColor(slika, cv.COLOR_BGR2GRAY)
-        centri = izracunaj_centre(slika_sivinska, "nakljucno", dimenzija, 2, k)
-        segmentirana_slika = np.zeros((visina, sirina), dtype=np.uint8)
-    elif dimenzija == 5:
-        centri = izracunaj_centre(slika, "nakljucno", dimenzija, 2, k)
-        segmentirana_slika = np.zeros((visina, sirina, 3), dtype=np.uint8)
-    
-    oznake = np.zeros((visina, sirina), dtype=np.int32)
-
-    for i in range(iteracije):
-        if dimenzija == 3:
-            # 1. Označimo vsak piksel s številko centra
-            for y in range(visina):
-                for x in range(sirina):
-                    piksel = np.array([x, y, slika_sivinska[y,x]], dtype=np.float64)
-
-                    # Izračunamo razdaljo do vseh centrov
-                    razdalje = []
-                    for center in centri:
-                        razdalja = evklidska_razdalja(piksel, center, dimenzija)
-                        razdalje.append(razdalja)
-
-                    # Najdemo najbližji center
-                    min_razdalja = min(razdalje)
-                    min_index = razdalje.index(min_razdalja)
-
-                    oznake[y,x] = min_index
-
-
-        elif dimenzija == 5:
-            for y in range(visina):
-                for x in range(sirina):
-                    piksel = np.array([x, y, slika[y, x][0], slika[y, x][1], slika[y, x][2]], dtype=np.float64)
-                    # Izračunamo razdaljo do vseh centrov
-                    razdalje = []
-                    for center in centri:
-                        razdalja = evklidska_razdalja(piksel, center, dimenzija)
-                        razdalje.append(razdalja)
-
-                    # Najdemo najbližji center
-                    min_razdalja = min(razdalje)
-                    min_index = razdalje.index(min_razdalja)
-
-                    # Dodelimo barvo centra
-                    oznake[y, x] = min_index
-
+    pass
 
 def meanshift(slika, velikost_okna, dimenzija):
     '''Izvede segmentacijo slike z uporabo metode mean-shift.'''
@@ -140,6 +92,3 @@ def izracunaj_centre(slika, izbira, dimenzija_centra, T, k):
 
 if __name__ == "__main__":
     print("Naloga 3: Segmentacija slik")
-
-    slika = cv.imread(".utils/small.jpg")
-
