@@ -60,7 +60,9 @@ def izracunaj_centre(slika, izbira, dimenzija_centra, T, k):
                     min_oddaljenost = min(oddaljenost_array)
                 if min_oddaljenost > T:
                         centri.append(center)
-        
+                        
+        return centri
+    
     elif izbira == "nakljucno":
         pass
     
