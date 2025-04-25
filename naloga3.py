@@ -147,6 +147,9 @@ def kmeans(slika, k=3, iteracije=10, dimenzija=3):
             elif dimenzija == 5:
                 segmentirana_slika[y, x] = centri[oznake[y, x]][2:5]
 
+    return segmentirana_slika
+
+
 
 def meanshift(slika, velikost_okna, dimenzija):
     '''Izvede segmentacijo slike z uporabo metode mean-shift.'''
