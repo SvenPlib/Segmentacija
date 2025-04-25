@@ -29,35 +29,37 @@ def meanshift(slika, velikost_okna, dimenzija):
     '''Izvede segmentacijo slike z uporabo metode mean-shift.'''
     pass
 
-def izracunaj_centre(slika, izbira, dimenzija_centra, T):
+def izracunaj_centre(slika, izbira, dimenzija_centra, T, k):
     '''Izračuna centre za metodo kmeans.'''
     visina, sirina = slika.shape[:2]
     centri = []
 
     # Izberemo naključne centre
     if izbira == "nakljucno":
-        x = np.random.randint(0, sirina)
-        y = np.random.randint(0, visina)
-            
-        barva = slika[y, x]
-        if dimenzija_centra == 5:
-            center = np.array([x, y, barva[0], barva[1], barva[2]])
-            # print(f"Center: {center}")
-        elif dimenzija_centra == 3:
-            center = np.array([x,y, barva])
-            # print(f"Center: {center}")
+        while len(centri) < k:
+            x = np.random.randint(0, sirina)
+            y = np.random.randint(0, visina)
+                
+            barva = slika[y, x]
 
-        if not centri:
-                centri.append(center)
-        else:
-            # Ali je center dovolj oddaljen od ostalih centrov
-            oddaljenost_array = []
-            for c in centri:
-                oddaljenost = evklidska_razdalja(center, c, dimenzija_centra)
-                oddaljenost_array.append(oddaljenost)
-                min_oddaljenost = min(oddaljenost_array)
-            if min_oddaljenost > T:
+            if dimenzija_centra == 5:
+                center = np.array([x, y, barva[0], barva[1], barva[2]])
+                # print(f"Center: {center}")
+            elif dimenzija_centra == 3:
+                center = np.array([x,y, barva])
+                # print(f"Center: {center}")
+
+            if not centri:
                     centri.append(center)
+            else:
+                # Ali je center dovolj oddaljen od ostalih centrov
+                oddaljenost_array = []
+                for c in centri:
+                    oddaljenost = evklidska_razdalja(center, c, dimenzija_centra)
+                    oddaljenost_array.append(oddaljenost)
+                    min_oddaljenost = min(oddaljenost_array)
+                if min_oddaljenost > T:
+                        centri.append(center)
         
     elif izbira == "nakljucno":
         pass
