@@ -23,7 +23,9 @@ def evklidska_razdalja(piksel, center, dimenzija):
 
 def kmeans(slika, k=3, iteracije=10):
     '''Izvede segmentacijo slike z uporabo metode k-means.'''
-    pass
+    visina, sirina, kanali = slika.shape
+
+    
 
 def meanshift(slika, velikost_okna, dimenzija):
     '''Izvede segmentacijo slike z uporabo metode mean-shift.'''
