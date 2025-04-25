@@ -10,7 +10,12 @@ def meanshift(slika, velikost_okna, dimenzija):
 
 def izracunaj_centre(slika, izbira, dimenzija_centra, T):
     '''Izračuna centre za metodo kmeans.'''
-    pass
+    # Izberemo naključne centre
+    if izbira == "nakljucno":
+        pass
+    elif izbira == "nakljucno":
+        pass
+    
 
 if __name__ == "__main__":
     print("Naloga 3: Segmentacija slik")
