@@ -41,9 +41,11 @@ def izracunaj_centre(slika, izbira, dimenzija_centra, T):
             
         barva = slika[y, x]
         if dimenzija_centra == 5:
-            print("Izbrali smo naključne centre v 5D prostoru.")
+            center = np.array([x, y, barva[0], barva[1], barva[2]])
+            # print(f"Center: {center}")
         elif dimenzija_centra == 3:
-            print("Izbrali smo naključne centre v 3D prostoru.")
+            center = np.array([x,y, barva])
+            # print(f"Center: {center}")
         
     elif izbira == "nakljucno":
         pass
