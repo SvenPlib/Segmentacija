@@ -12,7 +12,11 @@ def izracunaj_centre(slika, izbira, dimenzija_centra, T):
     '''Izračuna centre za metodo kmeans.'''
     # Izberemo naključne centre
     if izbira == "nakljucno":
-        pass
+        if dimenzija_centra == 5:
+            print("Izbrali smo naključne centre v 5D prostoru.")
+        elif dimenzija_centra == 3:
+            print("Izbrali smo naključne centre v 3D prostoru.")
+        
     elif izbira == "nakljucno":
         pass
     
