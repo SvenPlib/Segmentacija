@@ -34,6 +34,7 @@ def kmeans(slika, k=3, iteracije=10, dimenzija=3):
         segmentirana_slika = np.zeros((visina, sirina, 3), dtype=np.uint8)
     
     oznake = np.zeros((visina, sirina), dtype=np.int32)
+    toleranca = 1
 
     for i in range(iteracije):
         if dimenzija == 3:
@@ -73,6 +74,19 @@ def kmeans(slika, k=3, iteracije=10, dimenzija=3):
                 else:
                     novi_centri.append(centri[i])
 
+            # 3. Preverimo, ali so se centri spremenili
+            premiki = []
+            for i in range(k):
+                premik = evklidska_razdalja(centri[i], novi_centri[i], dimenzija)
+                premiki.append(premik)
+
+            # Če so se centri premaknili manj kot toleranca, končamo
+            if all(premik < toleranca for premik in premiki):
+                print(f"Končali po {i} iteracijah.")
+                break
+            else:
+                # Posodobimo centre
+                centri = novi_centri
 
         elif dimenzija == 5:
             # 1. Označimo vsak piksel s številko centra
@@ -110,6 +124,20 @@ def kmeans(slika, k=3, iteracije=10, dimenzija=3):
                     novi_centri.append(povprecje)
                 else:
                     novi_centri.append(centri[i])
+
+            # 3. Preverimo, ali so se centri spremenili
+            premiki = []
+            for i in range(k):
+                premik = evklidska_razdalja(centri[i], novi_centri[i], dimenzija)
+                premiki.append(premik)
+
+            # Če so se centri premaknili manj kot toleranca, končamo
+            if all(premik < toleranca for premik in premiki):
+                print(f"Končali po {i} iteracijah.")
+                break
+            else:
+                # Posodobimo centre
+                centri = novi_centri
 
 
 def meanshift(slika, velikost_okna, dimenzija):
