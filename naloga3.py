@@ -33,8 +33,6 @@ def kmeans(slika, k=3, iteracije=10, dimenzija=3):
         centri = izracunaj_centre(slika, "nakljucno", dimenzija, 2, k)
         segmentirana_slika = np.zeros((visina, sirina, 3), dtype=np.uint8)
 
-    oznake = np.zeros((visina, sirina), dtype=np.int32)
-
 def meanshift(slika, velikost_okna, dimenzija):
     '''Izvede segmentacijo slike z uporabo metode mean-shift.'''
     pass
