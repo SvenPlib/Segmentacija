@@ -35,6 +35,44 @@ def kmeans(slika, k=3, iteracije=10, dimenzija=3):
     
     oznake = np.zeros((visina, sirina), dtype=np.int32)
 
+    for i in range(iteracije):
+        if dimenzija == 3:
+            # 1. Označimo vsak piksel s številko centra
+            for y in range(visina):
+                for x in range(sirina):
+                    piksel = np.array([x, y, slika_sivinska[y,x]], dtype=np.float64)
+
+                    # Izračunamo razdaljo do vseh centrov
+                    razdalje = []
+                    for center in centri:
+                        razdalja = evklidska_razdalja(piksel, center, dimenzija)
+                        razdalje.append(razdalja)
+
+                    # Najdemo najbližji center
+                    min_razdalja = min(razdalje)
+                    min_index = razdalje.index(min_razdalja)
+
+                    oznake[y,x] = min_index
+
+
+        elif dimenzija == 5:
+            for y in range(visina):
+                for x in range(sirina):
+                    piksel = np.array([x, y, slika[y, x][0], slika[y, x][1], slika[y, x][2]], dtype=np.float64)
+                    # Izračunamo razdaljo do vseh centrov
+                    razdalje = []
+                    for center in centri:
+                        razdalja = evklidska_razdalja(piksel, center, dimenzija)
+                        razdalje.append(razdalja)
+
+                    # Najdemo najbližji center
+                    min_razdalja = min(razdalje)
+                    min_index = razdalje.index(min_razdalja)
+
+                    # Dodelimo barvo centra
+                    oznake[y, x] = min_index
+
+
 def meanshift(slika, velikost_okna, dimenzija):
     '''Izvede segmentacijo slike z uporabo metode mean-shift.'''
     pass
@@ -102,3 +140,5 @@ def izracunaj_centre(slika, izbira, dimenzija_centra, T, k):
 
 if __name__ == "__main__":
     print("Naloga 3: Segmentacija slik")
+
+    slika = cv.imread(".utils/small.jpg")
