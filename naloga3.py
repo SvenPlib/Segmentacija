@@ -63,8 +63,31 @@ def izracunaj_centre(slika, izbira, dimenzija_centra, T, k):
                         
         return centri
     
-    elif izbira == "nakljucno":
-        pass
+    elif izbira == "rocno":
+        izbrane_tocke = []
+
+        def onclick(event, x, y, flags, param):
+            if event == cv.EVENT_LBUTTONDOWN:
+                barva = slika[y, x]
+                if dimenzija_centra == 5:
+                    center = np.array([x, y, barva[0], barva[1], barva[2]])
+                elif dimenzija_centra == 3:
+                    center = np.array([x, y, barva])
+                izbrane_tocke.append(center)
+                print(f"Izbran center {len(izbrane_tocke)}: {center}")
+                cv.circle(slika, (x, y), 5, (0, 255, 0), -1)
+                cv.imshow("Izvorna slika", slika)
+
+                if len(izbrane_tocke) == k:
+                    cv.destroyAllWindows()
+
+        print(f"Klikni {k} točk na sliki za določitev centrov.")
+        cv.imshow("Izvorna slika", slika)
+        cv.setMouseCallback("Izvorna slika", onclick)
+        cv.waitKey(0)
+        cv.destroyAllWindows()
+
+        return izbrane_tocke
     
 
 if __name__ == "__main__":
