@@ -46,6 +46,18 @@ def izracunaj_centre(slika, izbira, dimenzija_centra, T):
         elif dimenzija_centra == 3:
             center = np.array([x,y, barva])
             # print(f"Center: {center}")
+
+        if not centri:
+                centri.append(center)
+        else:
+            # Ali je center dovolj oddaljen od ostalih centrov
+            oddaljenost_array = []
+            for c in centri:
+                oddaljenost = evklidska_razdalja(center, c, dimenzija_centra)
+                oddaljenost_array.append(oddaljenost)
+                min_oddaljenost = min(oddaljenost_array)
+            if min_oddaljenost > T:
+                    centri.append(center)
         
     elif izbira == "nakljucno":
         pass
