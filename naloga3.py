@@ -217,6 +217,23 @@ def meanshift(slika, velikost_okna, dimenzija, iteracije):
             centri.append(tocka.copy())
             oznake[i] = len(centri) - 1
 
+    # Ustvarimo segmentirano sliko
+    segmentirana_slika = np.zeros_like(slika, dtype=np.uint8)
+
+    for i in range(len(točke)):
+        y = i // sirina
+        x = i % sirina
+        segment = oznake[i]
+
+        if dimenzija == 3:
+            barva_segmenta = centri[segment][:3]
+        elif dimenzija == 5:
+            barva_segmenta = centri[segment][2:5]
+
+        segmentirana_slika[y, x] = barva_segmenta
+
+    return segmentirana_slika
+
             
 def izracunaj_centre(slika, izbira, dimenzija_centra, T, k):
     '''Izračuna centre za metodo kmeans.'''
