@@ -153,7 +153,7 @@ def kmeans(slika, k=3, iteracije=10, dimenzija=3):
     return segmentirana_slika
 
 
-def meanshift(slika, velikost_okna, dimenzija):
+def meanshift(slika, velikost_okna, dimenzija, iteracije):
     '''Izvede segmentacijo slike z uporabo metode mean-shift.'''
     visina, sirina, kanali = slika.shape
     točke = []
@@ -170,6 +170,36 @@ def meanshift(slika, velikost_okna, dimenzija):
 
     točke = np.array(točke, dtype=np.float32)
     
+    konvergirane_tocke = []
+
+    # Proces za vsako točko v sliki
+    for i in range(len(točke)):
+        trenutna_tocka = točke[i]
+
+        for _ in range(iteracije):
+            uteži_vsote = 0.0
+            uteženi_sestevek = np.zeros(dimenzija, dtype=np.float32)
+
+            for točka in točke:
+                razdalja = evklidska_razdalja(trenutna_tocka, točka, dimenzija)
+                utež = gaussovo_jedro(razdalja, velikost_okna)
+                uteži_vsote += utež
+                uteženi_sestevek += točka * utež
+
+            if uteži_vsote == 0:
+                break
+
+            nova_tocka = uteženi_sestevek / uteži_vsote
+            razdalja = evklidska_razdalja(trenutna_tocka, nova_tocka, dimenzija)
+
+            if razdalja < 0.1:
+                break
+
+            trenutna_tocka = nova_tocka
+
+        konvergirane_tocke.append(trenutna_tocka)
+
+    konvergirane_tocke = np.array(konvergirane_tocke, dtype=np.float32)
 
 def izracunaj_centre(slika, izbira, dimenzija_centra, T, k):
     '''Izračuna centre za metodo kmeans.'''
