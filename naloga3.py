@@ -155,7 +155,21 @@ def kmeans(slika, k=3, iteracije=10, dimenzija=3):
 
 def meanshift(slika, velikost_okna, dimenzija):
     '''Izvede segmentacijo slike z uporabo metode mean-shift.'''
-    pass
+    visina, sirina, kanali = slika.shape
+    točke = []
+
+    for y in range(visina):
+        for x in range(sirina):
+            barva = slika[y, x]
+            if dimenzija == 3:
+                točka = [barva[0], barva[1], barva[2]]
+            elif dimenzija == 5:
+                točka = [x, y, barva[0], barva[1], barva[2]]
+            točke.append(točka)
+
+
+    točke = np.array(točke, dtype=np.float32)
+    
 
 def izracunaj_centre(slika, izbira, dimenzija_centra, T, k):
     '''Izračuna centre za metodo kmeans.'''
