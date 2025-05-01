@@ -20,6 +20,9 @@ def evklidska_razdalja(piksel, center, dimenzija):
         dg = piksel[3] - center[3]
         db = piksel[4] - center[4]
         return math.sqrt(dx*dx + dy*dy + dr*dr + dg*dg + db*db)
+    
+def gaussovo_jedro(d, h):
+    return np.exp(-d**2 / (2 * h**2))
 
 def kmeans(slika, k=3, iteracije=10, dimenzija=3):
     '''Izvede segmentacijo slike z uporabo metode k-means.'''
