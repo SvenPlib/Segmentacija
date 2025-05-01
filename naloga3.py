@@ -201,6 +201,23 @@ def meanshift(slika, velikost_okna, dimenzija, iteracije):
 
     konvergirane_tocke = np.array(konvergirane_tocke, dtype=np.float32)
 
+     # --- Združevanje konvergiranih točk v centre ---
+    min_cd = 100
+    centri = []
+    oznake = np.zeros((visina * sirina), dtype=np.int32)
+
+    for i, tocka in enumerate(konvergirane_tocke):
+        dodeljen = False
+        for j, center in enumerate(centri):
+            if evklidska_razdalja(tocka, center, dimenzija) < min_cd:
+                oznake[i] = j
+                dodeljen = True
+                break
+        if not dodeljen:
+            centri.append(tocka.copy())
+            oznake[i] = len(centri) - 1
+
+            
 def izracunaj_centre(slika, izbira, dimenzija_centra, T, k):
     '''Izračuna centre za metodo kmeans.'''
     visina, sirina = slika.shape[:2]
