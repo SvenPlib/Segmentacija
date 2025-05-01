@@ -20,6 +20,9 @@ def evklidska_razdalja(piksel, center, dimenzija):
         dg = piksel[3] - center[3]
         db = piksel[4] - center[4]
         return math.sqrt(dx*dx + dy*dy + dr*dr + dg*dg + db*db)
+    
+def gaussovo_jedro(d, h):
+    return np.exp(-d**2 / (2 * h**2))
 
 def kmeans(slika, k=3, iteracije=10, dimenzija=3):
     '''Izvede segmentacijo slike z uporabo metode k-means.'''
@@ -150,10 +153,88 @@ def kmeans(slika, k=3, iteracije=10, dimenzija=3):
     return segmentirana_slika
 
 
-def meanshift(slika, velikost_okna, dimenzija):
+def meanshift(slika, velikost_okna, dimenzija, iteracije):
     '''Izvede segmentacijo slike z uporabo metode mean-shift.'''
-    pass
+    visina, sirina, kanali = slika.shape
+    točke = []
 
+    for y in range(visina):
+        for x in range(sirina):
+            barva = slika[y, x]
+            if dimenzija == 3:
+                točka = [barva[0], barva[1], barva[2]]
+            elif dimenzija == 5:
+                točka = [x, y, barva[0], barva[1], barva[2]]
+            točke.append(točka)
+
+
+    točke = np.array(točke, dtype=np.float32)
+    
+    konvergirane_tocke = []
+
+    # Proces za vsako točko v sliki
+    for i in range(len(točke)):
+        trenutna_tocka = točke[i]
+
+        for _ in range(iteracije):
+            uteži_vsote = 0.0
+            uteženi_sestevek = np.zeros(dimenzija, dtype=np.float32)
+
+            for točka in točke:
+                razdalja = evklidska_razdalja(trenutna_tocka, točka, dimenzija)
+                utež = gaussovo_jedro(razdalja, velikost_okna)
+                uteži_vsote += utež
+                uteženi_sestevek += točka * utež
+
+            if uteži_vsote == 0:
+                break
+
+            nova_tocka = uteženi_sestevek / uteži_vsote
+            razdalja = evklidska_razdalja(trenutna_tocka, nova_tocka, dimenzija)
+
+            if razdalja < 0.1:
+                break
+
+            trenutna_tocka = nova_tocka
+
+        konvergirane_tocke.append(trenutna_tocka)
+
+    konvergirane_tocke = np.array(konvergirane_tocke, dtype=np.float32)
+
+     # --- Združevanje konvergiranih točk v centre ---
+    min_cd = 100
+    centri = []
+    oznake = np.zeros((visina * sirina), dtype=np.int32)
+
+    for i, tocka in enumerate(konvergirane_tocke):
+        dodeljen = False
+        for j, center in enumerate(centri):
+            if evklidska_razdalja(tocka, center, dimenzija) < min_cd:
+                oznake[i] = j
+                dodeljen = True
+                break
+        if not dodeljen:
+            centri.append(tocka.copy())
+            oznake[i] = len(centri) - 1
+
+    # Ustvarimo segmentirano sliko
+    segmentirana_slika = np.zeros_like(slika, dtype=np.uint8)
+
+    for i in range(len(točke)):
+        y = i // sirina
+        x = i % sirina
+        segment = oznake[i]
+
+        if dimenzija == 3:
+            barva_segmenta = centri[segment][:3]
+        elif dimenzija == 5:
+            barva_segmenta = centri[segment][2:5]
+
+        segmentirana_slika[y, x] = barva_segmenta
+
+    return segmentirana_slika
+
+            
 def izracunaj_centre(slika, izbira, dimenzija_centra, T, k):
     '''Izračuna centre za metodo kmeans.'''
     visina, sirina = slika.shape[:2]
