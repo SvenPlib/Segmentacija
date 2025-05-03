@@ -8,10 +8,10 @@ def evklidska_razdalja(piksel, center, dimenzija):
     center = np.array(center, dtype=np.float64)
     if dimenzija == 3:
         # Če imamo samo barvo
-        dx = piksel[0] - center[0]
-        dy = piksel[1] - center[1]
-        ds = piksel[2] - center[2]
-        return math.sqrt(dx*dx + dy*dy + ds*ds)
+        dr = piksel[0] - center[0]
+        dg = piksel[1] - center[1]
+        db = piksel[2] - center[2]
+        return math.sqrt(dr*dr + dg*dg + db*db)
     elif dimenzija == 5:
         # Če imamo tudi lokacijo
         dx = piksel[0] - center[0]
@@ -24,16 +24,15 @@ def evklidska_razdalja(piksel, center, dimenzija):
 def gaussovo_jedro(d, h):
     return np.exp(-d**2 / (2 * h**2))
 
-def kmeans(slika, k=3, iteracije=10, dimenzija=3):
+def kmeans(slika, k=3, iteracije=10, dimenzija=5):
     '''Izvede segmentacijo slike z uporabo metode k-means.'''
     visina, sirina, kanali = slika.shape
 
     if dimenzija == 3:
-        slika_sivinska = cv.cvtColor(slika, cv.COLOR_BGR2GRAY)
-        centri = izracunaj_centre(slika_sivinska, "nakljucno", dimenzija, 2, k)
-        segmentirana_slika = np.zeros((visina, sirina), dtype=np.uint8)
+        centri = izracunaj_centre(slika, "nakljucno", dimenzija, 5, k)
+        segmentirana_slika = np.zeros((visina, sirina, 3), dtype=np.uint8)
     elif dimenzija == 5:
-        centri = izracunaj_centre(slika, "nakljucno", dimenzija, 2, k)
+        centri = izracunaj_centre(slika, "rocno", dimenzija, 200, k)
         segmentirana_slika = np.zeros((visina, sirina, 3), dtype=np.uint8)
     
     oznake = np.zeros((visina, sirina), dtype=np.int32)
@@ -44,7 +43,7 @@ def kmeans(slika, k=3, iteracije=10, dimenzija=3):
             # 1. Označimo vsak piksel s številko centra
             for y in range(visina):
                 for x in range(sirina):
-                    piksel = np.array([x, y, slika_sivinska[y,x]], dtype=np.float64)
+                    piksel = np.array([slika[y,x][0], slika[y,x][1], slika[y,x][2]], dtype=np.float64)
 
                     # Izračunamo razdaljo do vseh centrov
                     razdalje = []
@@ -68,7 +67,7 @@ def kmeans(slika, k=3, iteracije=10, dimenzija=3):
                 for y in range(visina):
                     for x in range(sirina):
                         if oznake[y,x] == i:
-                            pikseli.append([x,y, slika_sivinska[y,x]])
+                            pikseli.append([slika[y,x][0], slika[y,x][1], slika[y,x][2]])
 
                 # Izračunamo povprečje
                 if len(pikseli) > 0:
@@ -146,91 +145,91 @@ def kmeans(slika, k=3, iteracije=10, dimenzija=3):
     for y in range(visina):
         for x in range(sirina):
             if dimenzija == 3:
-                segmentirana_slika[y, x] = centri[oznake[y, x]][2]
+                segmentirana_slika[y, x] = centri[oznake[y, x]][:3]
             elif dimenzija == 5:
                 segmentirana_slika[y, x] = centri[oznake[y, x]][2:5]
 
     return segmentirana_slika
 
 
-def meanshift(slika, velikost_okna, dimenzija, iteracije):
+def meanshift(slika, velikost_okna=30, dimenzija=5, iteracije=5):
     '''Izvede segmentacijo slike z uporabo metode mean-shift.'''
-    visina, sirina, kanali = slika.shape
-    točke = []
+    visina, sirina = slika.shape[:2]
+    točke = np.zeros((visina, sirina, dimenzija), dtype=np.float32)
 
+    # Zbiranje podatkov za vsak piksel v sliki
     for y in range(visina):
         for x in range(sirina):
             barva = slika[y, x]
             if dimenzija == 3:
-                točka = [barva[0], barva[1], barva[2]]
+                točke[y, x] = [barva[0], barva[1], barva[2]]
             elif dimenzija == 5:
-                točka = [x, y, barva[0], barva[1], barva[2]]
-            točke.append(točka)
-
-
-    točke = np.array(točke, dtype=np.float32)
+                točke[y, x] = [x, y, barva[0], barva[1], barva[2]]
     
-    konvergirane_tocke = []
+    konvergirane_tocke = np.zeros((visina, sirina, dimenzija), dtype=np.float32)
 
     # Proces za vsako točko v sliki
-    for i in range(len(točke)):
-        trenutna_tocka = točke[i]
+    for y in range(visina):
+        for x in range(sirina):
+            trenutna_tocka = točke[y, x]
 
-        for _ in range(iteracije):
-            uteži_vsote = 0.0
-            uteženi_sestevek = np.zeros(dimenzija, dtype=np.float32)
+            for _ in range(iteracije):
+                uteži_vsote = 0.0
+                uteženi_sestevek = np.zeros(dimenzija, dtype=np.float32)
 
-            for točka in točke:
-                razdalja = evklidska_razdalja(trenutna_tocka, točka, dimenzija)
-                utež = gaussovo_jedro(razdalja, velikost_okna)
-                uteži_vsote += utež
-                uteženi_sestevek += točka * utež
+                for j in range(visina):
+                    for i in range(sirina):
+                        točka = točke[j, i]
+                        razdalja = evklidska_razdalja(trenutna_tocka, točka, dimenzija)
+                        utež = gaussovo_jedro(razdalja, velikost_okna)
+                        uteži_vsote += utež
+                        uteženi_sestevek += točka * utež
 
-            if uteži_vsote == 0:
-                break
+                if uteži_vsote == 0:
+                    break
 
-            nova_tocka = uteženi_sestevek / uteži_vsote
-            razdalja = evklidska_razdalja(trenutna_tocka, nova_tocka, dimenzija)
+                nova_tocka = uteženi_sestevek / uteži_vsote
+                razdalja = evklidska_razdalja(trenutna_tocka, nova_tocka, dimenzija)
 
-            if razdalja < 0.1:
-                break
+                if razdalja < 0.1:
+                    break
 
-            trenutna_tocka = nova_tocka
+                trenutna_tocka = nova_tocka
 
-        konvergirane_tocke.append(trenutna_tocka)
+            konvergirane_tocke[y, x] = trenutna_tocka
 
-    konvergirane_tocke = np.array(konvergirane_tocke, dtype=np.float32)
-
-     # --- Združevanje konvergiranih točk v centre ---
-    min_cd = 100
+     # Združevanje konvergiranih točk v centre
+    min_cd = 200
     centri = []
-    oznake = np.zeros((visina * sirina), dtype=np.int32)
+    oznake = np.zeros((visina, sirina), dtype=np.int32)
 
-    for i, tocka in enumerate(konvergirane_tocke):
-        dodeljen = False
-        for j, center in enumerate(centri):
-            if evklidska_razdalja(tocka, center, dimenzija) < min_cd:
-                oznake[i] = j
-                dodeljen = True
-                break
-        if not dodeljen:
-            centri.append(tocka.copy())
-            oznake[i] = len(centri) - 1
+    for y in range(visina):
+        for x in range(sirina):
+            tocka = konvergirane_tocke[y, x]
+            dodeljen = False                
+            for j, center in enumerate(centri):
+                if evklidska_razdalja(tocka, center, dimenzija) < min_cd:
+                    oznake[y, x] = j 
+                    dodeljen = True
+                    break
+
+            if not dodeljen:
+                centri.append(tocka.copy())
+                oznake[y, x] = len(centri) - 1 
 
     # Ustvarimo segmentirano sliko
     segmentirana_slika = np.zeros_like(slika, dtype=np.uint8)
 
-    for i in range(len(točke)):
-        y = i // sirina
-        x = i % sirina
-        segment = oznake[i]
+    for y in range(visina):
+        for x in range(sirina):
+            segment = oznake[y, x]
 
-        if dimenzija == 3:
-            barva_segmenta = centri[segment][:3]
-        elif dimenzija == 5:
-            barva_segmenta = centri[segment][2:5]
+            if dimenzija == 3:
+                barva_segmenta = centri[segment][:3]
+            elif dimenzija == 5:
+                barva_segmenta = centri[segment][2:5]
 
-        segmentirana_slika[y, x] = barva_segmenta
+            segmentirana_slika[y, x] = barva_segmenta
 
     return segmentirana_slika
 
@@ -252,7 +251,7 @@ def izracunaj_centre(slika, izbira, dimenzija_centra, T, k):
                 center = np.array([x, y, barva[0], barva[1], barva[2]])
                 # print(f"Center: {center}")
             elif dimenzija_centra == 3:
-                center = np.array([x,y, barva])
+                center = np.array([barva[0], barva[1], barva[2]])
                 # print(f"Center: {center}")
 
             if not centri:
@@ -278,7 +277,7 @@ def izracunaj_centre(slika, izbira, dimenzija_centra, T, k):
                 if dimenzija_centra == 5:
                     center = np.array([x, y, barva[0], barva[1], barva[2]])
                 elif dimenzija_centra == 3:
-                    center = np.array([x, y, barva])
+                    center = np.array([barva[0], barva[1], barva[2]])
                 izbrane_tocke.append(center)
                 print(f"Izbran center {len(izbrane_tocke)}: {center}")
                 cv.circle(slika, (x, y), 5, (0, 255, 0), -1)
@@ -299,8 +298,16 @@ def izracunaj_centre(slika, izbira, dimenzija_centra, T, k):
 if __name__ == "__main__":
     print("Naloga 3: Segmentacija slik")
 
-    slika = cv.imread(".utils/small.jpg")
-    seg_slika = kmeans(slika, k=3, iteracije=10, dimenzija=3)
+    slika = cv.imread(".utils/zelenjava_mega_small.jpg")
+    slika = cv.resize(slika, (50,50))
+    if slika is None:
+        print("Napaka: Slika ni bila naložena.")
+        exit()
+    else:
+        print("Slika uspešno naložena:", slika.shape)
+
+    seg_slika = meanshift(slika)
+
     cv.imshow("seg slika", seg_slika)
     cv.waitKey(0)
     cv.destroyAllWindows()
